@@ -1,0 +1,6 @@
+{
+  "name": "The Water Lily Spa",
+  "description": "Luxury Spa & Wellness Center with comprehensive customer booking and fully featured Admin Dashboard",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
