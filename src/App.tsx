@@ -4,8 +4,18 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { getStoredData, saveStaff, saveServices, saveOffers, saveBookings, saveAnnouncements, saveSettings, saveLocation } from './db';
-import { Staff, Service, Offer, Booking, Announcement, Settings, LocationInfo } from './types';
+import { 
+  getStoredData, saveStaff, saveServices, saveOffers, saveBookings, saveAnnouncements, saveSettings, saveLocation,
+  saveTherapistOfTheMonth, saveChatMessages, saveLoyaltyConfig, saveLoyaltyPoints, saveReviews,
+  saveReminderConfig, saveReminderLogs, savePriceComparison, saveAnnouncementTickers,
+  saveSocialFeed, saveAttendance, saveGiftVouchers, saveSpaPackages
+} from './db';
+import { 
+  Staff, Service, Offer, Booking, Announcement, Settings, LocationInfo,
+  TherapistOfTheMonth, ChatMessage, LoyaltyProgramConfig, CustomerPoints, Review,
+  ReminderConfig, ReminderLog, PriceComparisonConfig, AnnouncementTicker,
+  SocialFeedConfig, AttendanceRecord, GiftVoucher, SpaPackage
+} from './types';
 import PublicWebsite from './components/PublicWebsite';
 import AdminPanel from './components/AdminPanel';
 
@@ -22,6 +32,21 @@ export default function App() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [location, setLocation] = useState<LocationInfo | null>(null);
 
+  // New Features States (नये फीचर्स के स्टेट्स)
+  const [therapistOfTheMonth, setTherapistOfTheMonth] = useState<TherapistOfTheMonth | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [loyaltyConfig, setLoyaltyConfig] = useState<LoyaltyProgramConfig | null>(null);
+  const [loyaltyPoints, setLoyaltyPoints] = useState<CustomerPoints[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reminderConfig, setReminderConfig] = useState<ReminderConfig | null>(null);
+  const [reminderLogs, setReminderLogs] = useState<ReminderLog[]>([]);
+  const [priceComparison, setPriceComparison] = useState<PriceComparisonConfig | null>(null);
+  const [announcementTickers, setAnnouncementTickers] = useState<AnnouncementTicker[]>([]);
+  const [socialFeed, setSocialFeed] = useState<SocialFeedConfig | null>(null);
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
+  const [giftVouchers, setGiftVouchers] = useState<GiftVoucher[]>([]);
+  const [spaPackages, setSpaPackages] = useState<SpaPackage[]>([]);
+
   // --- INITIAL LOAD PORTAL (डेटाबेस का आरंभिक लोड) ---
   useEffect(() => {
     const loadedData = getStoredData();
@@ -32,10 +57,25 @@ export default function App() {
     setAnnouncements(loadedData.announcements);
     setSettings(loadedData.settings);
     setLocation(loadedData.location);
+
+    // Load new features (नये फीचर्स लोड करें)
+    setTherapistOfTheMonth(loadedData.therapistOfTheMonth);
+    setChatMessages(loadedData.chatMessages);
+    setLoyaltyConfig(loadedData.loyaltyConfig);
+    setLoyaltyPoints(loadedData.loyaltyPoints);
+    setReviews(loadedData.reviews);
+    setReminderConfig(loadedData.reminderConfig);
+    setReminderLogs(loadedData.reminderLogs);
+    setPriceComparison(loadedData.priceComparison);
+    setAnnouncementTickers(loadedData.announcementTickers);
+    setSocialFeed(loadedData.socialFeed);
+    setAttendance(loadedData.attendance);
+    setGiftVouchers(loadedData.giftVouchers);
+    setSpaPackages(loadedData.spaPackages);
   }, []);
 
   // Ensure settings are available before render
-  if (!settings || !location) {
+  if (!settings || !location || !therapistOfTheMonth || !loyaltyConfig || !reminderConfig || !priceComparison || !socialFeed) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f5f0e8]">
         <div className="text-center space-y-3">
@@ -149,6 +189,72 @@ export default function App() {
     saveLocation(newLoc);
   };
 
+  // NEW FEATURE ACTION DISPATCHERS (नये फीचर्स के एक्शन हैंडलर)
+  const handleUpdateTherapistOfTheMonth = (data: TherapistOfTheMonth) => {
+    setTherapistOfTheMonth(data);
+    saveTherapistOfTheMonth(data);
+  };
+
+  const handleUpdateChatMessages = (messages: ChatMessage[]) => {
+    setChatMessages(messages);
+    saveChatMessages(messages);
+  };
+
+  const handleUpdateLoyaltyConfig = (config: LoyaltyProgramConfig) => {
+    setLoyaltyConfig(config);
+    saveLoyaltyConfig(config);
+  };
+
+  const handleUpdateLoyaltyPoints = (points: CustomerPoints[]) => {
+    setLoyaltyPoints(points);
+    saveLoyaltyPoints(points);
+  };
+
+  const handleUpdateReviews = (newReviews: Review[]) => {
+    setReviews(newReviews);
+    saveReviews(newReviews);
+  };
+
+  const handleUpdateReminderConfig = (config: ReminderConfig) => {
+    setReminderConfig(config);
+    saveReminderConfig(config);
+  };
+
+  const handleUpdateReminderLogs = (logs: ReminderLog[]) => {
+    setReminderLogs(logs);
+    saveReminderLogs(logs);
+  };
+
+  const handleUpdatePriceComparison = (config: PriceComparisonConfig) => {
+    setPriceComparison(config);
+    savePriceComparison(config);
+  };
+
+  const handleUpdateAnnouncementTickers = (tickers: AnnouncementTicker[]) => {
+    setAnnouncementTickers(tickers);
+    saveAnnouncementTickers(tickers);
+  };
+
+  const handleUpdateSocialFeed = (feed: SocialFeedConfig) => {
+    setSocialFeed(feed);
+    saveSocialFeed(feed);
+  };
+
+  const handleUpdateAttendance = (records: AttendanceRecord[]) => {
+    setAttendance(records);
+    saveAttendance(records);
+  };
+
+  const handleUpdateGiftVouchers = (vouchers: GiftVoucher[]) => {
+    setGiftVouchers(vouchers);
+    saveGiftVouchers(vouchers);
+  };
+
+  const handleUpdateSpaPackages = (packages: SpaPackage[]) => {
+    setSpaPackages(packages);
+    saveSpaPackages(packages);
+  };
+
 
   // --- VIEW SWITCHER ROUTER (विंडो राउटर) ---
   return (
@@ -161,6 +267,25 @@ export default function App() {
           announcements={announcements}
           settings={settings}
           location={location}
+          
+          // New feature props
+          therapistOfTheMonth={therapistOfTheMonth}
+          chatMessages={chatMessages}
+          loyaltyConfig={loyaltyConfig}
+          loyaltyPoints={loyaltyPoints}
+          reviews={reviews}
+          reminderConfig={reminderConfig}
+          priceComparison={priceComparison}
+          announcementTickers={announcementTickers}
+          socialFeed={socialFeed}
+          attendance={attendance}
+          giftVouchers={giftVouchers}
+          spaPackages={spaPackages}
+          
+          onUpdateChatMessages={handleUpdateChatMessages}
+          onUpdateLoyaltyPoints={handleUpdateLoyaltyPoints}
+          onUpdateReviews={handleUpdateReviews}
+          onUpdateGiftVouchers={handleUpdateGiftVouchers}
           onAddBooking={handleAddBooking}
           onNavigateToAdmin={() => setCurrentView('admin')}
         />
@@ -173,6 +298,22 @@ export default function App() {
           announcements={announcements}
           settings={settings}
           location={location}
+          
+          // New feature props
+          therapistOfTheMonth={therapistOfTheMonth}
+          chatMessages={chatMessages}
+          loyaltyConfig={loyaltyConfig}
+          loyaltyPoints={loyaltyPoints}
+          reviews={reviews}
+          reminderConfig={reminderConfig}
+          reminderLogs={reminderLogs}
+          priceComparison={priceComparison}
+          announcementTickers={announcementTickers}
+          socialFeed={socialFeed}
+          attendance={attendance}
+          giftVouchers={giftVouchers}
+          spaPackages={spaPackages}
+
           onAddStaff={handleAddStaff}
           onUpdateStaff={handleUpdateStaff}
           onDeleteStaff={handleDeleteStaff}
@@ -188,6 +329,22 @@ export default function App() {
           onDeleteAnnouncement={handleDeleteAnnouncement}
           onUpdateSettings={handleUpdateSettings}
           onUpdateLocation={handleUpdateLocation}
+          
+          // New feature controllers
+          onUpdateTherapistOfTheMonth={handleUpdateTherapistOfTheMonth}
+          onUpdateChatMessages={handleUpdateChatMessages}
+          onUpdateLoyaltyConfig={handleUpdateLoyaltyConfig}
+          onUpdateLoyaltyPoints={handleUpdateLoyaltyPoints}
+          onUpdateReviews={handleUpdateReviews}
+          onUpdateReminderConfig={handleUpdateReminderConfig}
+          onUpdateReminderLogs={handleUpdateReminderLogs}
+          onUpdatePriceComparison={handleUpdatePriceComparison}
+          onUpdateAnnouncementTickers={handleUpdateAnnouncementTickers}
+          onUpdateSocialFeed={handleUpdateSocialFeed}
+          onUpdateAttendance={handleUpdateAttendance}
+          onUpdateGiftVouchers={handleUpdateGiftVouchers}
+          onUpdateSpaPackages={handleUpdateSpaPackages}
+
           onCloseAdmin={() => setCurrentView('public')}
         />
       )}

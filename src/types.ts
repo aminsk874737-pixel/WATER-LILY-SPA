@@ -16,6 +16,12 @@ export interface Staff {
   workingHours: string;
   status: 'Active' | 'Inactive';
   online: boolean; // Live online status
+  photoUrl?: string;
+  specialty?: string;
+  rating?: number;
+  biography?: string; // Long bio/description for profile modal
+  galleryPhotos?: string[]; // Extra photos
+  featuredBadge?: string; // Special accolade badge (e.g. Elite, Healing Hand)
 }
 
 export interface Service {
@@ -90,4 +96,139 @@ export interface LocationInfo {
   longitude: string;
   lastUpdated: string;
 }
+
+export interface TherapistOfTheMonth {
+  staffId: string;
+  enabled: boolean;
+  customMessage: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  sender: 'customer' | 'admin';
+  name: string;
+  email: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+}
+
+export interface LoyaltyProgramConfig {
+  enabled: boolean;
+  pointsPerBooking: number;
+  pointsValue: number; // e.g. 10 points = Rs. 100
+  minPointsToRedeem?: number;
+  pointValue?: number;
+}
+
+export interface CustomerPoints {
+  phone: string;
+  name: string;
+  points: number;
+  history: {
+    date: string;
+    description: string;
+    points: number;
+    type: 'earn' | 'redeem';
+  }[];
+}
+
+export interface Review {
+  id: string;
+  customerName: string;
+  rating: number; // 1-5
+  text: string;
+  serviceId: string;
+  date: string;
+  photoUrl: string;
+  status: 'Approved' | 'Pending' | 'Rejected';
+  featured: boolean;
+  reply: string;
+}
+
+export interface ReminderConfig {
+  enabled: boolean;
+  hoursBefore: number;
+  messageTemplate: string;
+}
+
+export interface ReminderLog {
+  id: string;
+  bookingId: string;
+  customerName: string;
+  customerPhone: string;
+  sentAt: string;
+  type: '24h' | '1h' | 'Manual';
+  status: string;
+}
+
+export interface PriceComparisonConfig {
+  enabled: boolean;
+  mostPopularId: string;
+  bestValueId: string;
+}
+
+export interface AnnouncementTicker {
+  id: string;
+  text: string;
+  link: string;
+  color: 'gold' | 'red' | 'green' | 'blue';
+  expiryDate: string; // YYYY-MM-DD
+  enabled: boolean;
+}
+
+export interface SocialFeedConfig {
+  instagramUrl: string;
+  instagramHandle?: string;
+  enabled: boolean;
+  posts: any[]; // list of image URLs or full post objects
+  postsToShow: number;
+}
+
+export interface AttendanceRecord {
+  date: string; // YYYY-MM-DD
+  records: { [staffId: string]: 'Present' | 'Absent' | 'Leave' | 'Half Day' };
+}
+
+export interface GiftVoucher {
+  id: string;
+  code: string;
+  amount: number;
+  recipientName: string;
+  recipientEmail: string;
+  senderName: string;
+  message: string;
+  deliveryDate: string;
+  used: boolean;
+  qrCode: string;
+}
+
+export interface SpaPackage {
+  id: string;
+  name: string;
+  services: string[]; // service IDs
+  price: number;
+  couplePrice?: number;
+  duration: number; // minutes
+  benefits: string[];
+  description?: string;
+  includedServices?: string[];
+  image: string;
+  enabled: boolean;
+}
+
+export interface ChatConfig {
+  welcomeMessage: string;
+  delaySeconds: number;
+}
+
+export interface CountdownConfig {
+  enabled: boolean;
+  label: string;
+  hours: number;
+}
+
+export type LoyaltyConfig = LoyaltyProgramConfig;
+export type SocialFeed = SocialFeedConfig;
+
 

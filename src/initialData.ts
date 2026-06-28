@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Staff, Service, Offer, Booking, Announcement, Settings, LocationInfo } from './types';
+import { Staff, Service, Offer, Booking, Announcement, Settings, LocationInfo, TherapistOfTheMonth, ChatMessage, LoyaltyProgramConfig, CustomerPoints, Review, ReminderConfig, ReminderLog, PriceComparisonConfig, AnnouncementTicker, SocialFeedConfig, AttendanceRecord, GiftVoucher, SpaPackage } from './types';
 
 export const DEFAULT_STAFF: Staff[] = [
   {
@@ -19,6 +19,13 @@ export const DEFAULT_STAFF: Staff[] = [
     workingHours: '9:00 AM - 5:00 PM',
     status: 'Active',
     online: true,
+    rating: 5,
+    featuredBadge: 'Aroma Queen',
+    biography: 'Kiara is an internationally certified aromatherapist with over 5 years of experience in luxury resorts. She excels in blending therapeutic essential oils designed to soothe nerves, alleviate stress, and restore physical energy. Her calming demeanor and professional touch make her a favourite among our regular premium clients.',
+    galleryPhotos: [
+      'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=300',
+      'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&q=80&w=300'
+    ]
   },
   {
     id: 'st-2',
@@ -33,6 +40,13 @@ export const DEFAULT_STAFF: Staff[] = [
     workingHours: '1:00 PM - 9:00 PM',
     status: 'Active',
     online: false,
+    rating: 5,
+    featuredBadge: 'Deep Tension Melt',
+    biography: 'Aarav brings a deep understanding of human anatomy to his practice. Specializing in Deep Tissue and Hot Stone treatments, he is highly skilled at identifying and relieving chronic muscular tension, athletic knots, and postural stress. His treatments combine firm pressure with healing thermal therapy.',
+    galleryPhotos: [
+      'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&q=80&w=300',
+      'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&q=80&w=300'
+    ]
   },
   {
     id: 'st-3',
@@ -47,6 +61,13 @@ export const DEFAULT_STAFF: Staff[] = [
     workingHours: '9:00 AM - 6:00 PM',
     status: 'Active',
     online: true,
+    rating: 5,
+    featuredBadge: 'Thai Yoga Expert',
+    biography: 'Priya trained directly at Wat Pho in Bangkok, specializing in traditional Royal Thai stretching and clinical reflexology. Her sessions are dynamic, incorporating yogic stretches and targeted acupressure to open energy pathways, enhance joint flexibility, and induce total body revitalization.',
+    galleryPhotos: [
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300',
+      'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&q=80&w=300'
+    ]
   },
   {
     id: 'st-4',
@@ -61,6 +82,13 @@ export const DEFAULT_STAFF: Staff[] = [
     workingHours: '11:00 AM - 8:00 PM',
     status: 'Active',
     online: true,
+    rating: 5,
+    featuredBadge: 'Skincare Guru',
+    biography: 'Meera is a certified aesthetic therapist specializing in advanced skincare and anti-aging treatments. She is famous for her signature 24K Gold Leaf facial massage and botanical skin therapies that leave a luminous, healthy glow. Her approach is tailored carefully to every skin type.',
+    galleryPhotos: [
+      'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=300',
+      'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&q=80&w=300'
+    ]
   },
   {
     id: 'st-5',
@@ -75,6 +103,13 @@ export const DEFAULT_STAFF: Staff[] = [
     workingHours: '12:00 PM - 9:00 PM',
     status: 'Active',
     online: true,
+    rating: 5,
+    featuredBadge: 'Elite Concierge',
+    biography: 'Rohan represents the pinnacle of hospitality and wellness. With nearly a decade of experience serving elite dignitaries and corporate leaders, he delivers tailored full-body therapies combined with curated wellness advice. He is expert in combined healing routines.',
+    galleryPhotos: [
+      'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&q=80&w=300',
+      'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&q=80&w=300'
+    ]
   },
   {
     id: 'st-6',
@@ -89,6 +124,13 @@ export const DEFAULT_STAFF: Staff[] = [
     workingHours: '9:00 AM - 5:00 PM',
     status: 'Active',
     online: false,
+    rating: 5,
+    featuredBadge: 'Ayurveda Expert',
+    biography: 'Aisha graduated from a premier Ayurvedic institute in Kerala. She is highly trained in Marma Chikitsa (vital energy point therapy) and traditional herbal potli treatments. Her therapies balance the doshas, detoxify tissues, and restore a state of holistic peace.',
+    galleryPhotos: [
+      'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=300',
+      'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&q=80&w=300'
+    ]
   }
 ];
 
@@ -335,3 +377,245 @@ export const DEFAULT_BOOKINGS: Booking[] = [
     createdAt: '2026-06-27T09:15:00.000Z',
   }
 ];
+
+export const DEFAULT_THERAPIST_OF_THE_MONTH: TherapistOfTheMonth = {
+  staffId: 'st-1', // Kiara Sen
+  enabled: true,
+  customMessage: 'Kiara holds a Master Touch in deep-tissue alignment and sensory aroma-therapy. Awarded for her pristine professionalism and 100% positive guest feedback this month!'
+};
+
+export const DEFAULT_CHAT_MESSAGES: ChatMessage[] = [
+  {
+    id: 'msg-1',
+    sender: 'admin',
+    name: 'System Response',
+    email: 'support@thewaterlilyspa.com',
+    message: 'Welcome to The Water Lily Spa! How can we help you today? (द वॉटर लिली स्पा में आपका स्वागत है! आज हम आपकी क्या मदद कर सकते हैं?)',
+    timestamp: '2026-06-27 12:00:00',
+    read: true
+  },
+  {
+    id: 'msg-2',
+    sender: 'customer',
+    name: 'Ramesh Sharma',
+    email: 'ramesh@gmail.com',
+    message: 'Hi, I want to book a Couple’s Paradise Suite for tomorrow evening. Is it available at 6 PM?',
+    timestamp: '2026-06-28 10:15:00',
+    read: false
+  }
+];
+
+export const DEFAULT_LOYALTY_PROGRAM_CONFIG: LoyaltyProgramConfig = {
+  enabled: true,
+  pointsPerBooking: 10,
+  pointsValue: 10 // 10 points = Rs. 100 (which means 1 point = ₹10 discount, or 10 points = 100 Rs discount)
+};
+
+export const DEFAULT_CUSTOMER_POINTS: CustomerPoints[] = [
+  {
+    phone: '9876543210',
+    name: 'Amit Patel',
+    points: 20,
+    history: [
+      { date: '2026-06-25', description: 'Points earned from Booking WLS-1041', points: 10, type: 'earn' },
+      { date: '2026-06-27', description: 'Points earned from Booking WLS-1042', points: 10, type: 'earn' }
+    ]
+  },
+  {
+    phone: '8765432109',
+    name: 'Sneha Reddy',
+    points: 10,
+    history: [
+      { date: '2026-06-27', description: 'Points earned from Booking WLS-1043', points: 10, type: 'earn' }
+    ]
+  }
+];
+
+export const DEFAULT_REVIEWS: Review[] = [
+  {
+    id: 'rev-1',
+    customerName: 'Ananya Sen',
+    rating: 5,
+    text: 'Absolutely heaven! The Gold Leaf Rejuvenation is worth every single rupee. Meera was incredibly skilled and professional. Highly recommended!',
+    serviceId: 'ser-7',
+    date: '2026-06-25',
+    photoUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150',
+    status: 'Approved',
+    featured: true,
+    reply: 'Thank you Ananya for your beautiful feedback! We hope to pamper you again soon.'
+  },
+  {
+    id: 'rev-2',
+    customerName: 'Rajesh Kumar',
+    rating: 5,
+    text: 'Excellent Swedish Massage by Kiara. Relieved all my work stress in an hour. Very clean and soothing environment.',
+    serviceId: 'ser-1',
+    date: '2026-06-26',
+    photoUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=150',
+    status: 'Approved',
+    featured: true,
+    reply: 'Our pleasure, Rajesh! Kiara is indeed one of our finest therapists.'
+  },
+  {
+    id: 'rev-3',
+    customerName: 'Karan Mehra',
+    rating: 4,
+    text: 'Very relaxing aroma therapy session. Booking was smooth. Will definitely visit again for a weekend detox.',
+    serviceId: 'ser-3',
+    date: '2026-06-27',
+    photoUrl: '',
+    status: 'Approved',
+    featured: false,
+    reply: ''
+  }
+];
+
+export const DEFAULT_REMINDER_CONFIG: ReminderConfig = {
+  enabled: true,
+  hoursBefore: 24,
+  messageTemplate: '🪷 Reminder: Your appointment at The Water Lily Spa is scheduled with [THERAPIST] for [SERVICE] at [TIME] on [DATE]. See you soon!'
+};
+
+export const DEFAULT_REMINDER_LOGS: ReminderLog[] = [
+  {
+    id: 'rem-1',
+    bookingId: 'WLS-1042',
+    customerName: 'Amit Patel',
+    customerPhone: '9876543210',
+    sentAt: '2026-06-26 10:00:00',
+    type: '24h',
+    status: 'Delivered (WhatsApp Sim)'
+  },
+  {
+    id: 'rem-2',
+    bookingId: 'WLS-1043',
+    customerName: 'Sneha Reddy',
+    customerPhone: '8765432109',
+    sentAt: '2026-06-26 15:00:00',
+    type: '24h',
+    status: 'Delivered (WhatsApp Sim)'
+  }
+];
+
+export const DEFAULT_PRICE_COMPARISON_CONFIG: PriceComparisonConfig = {
+  enabled: true,
+  mostPopularId: 'ser-1', // Swedish Massage
+  bestValueId: 'ser-7' // Gold Leaf Rejuvenation
+};
+
+export const DEFAULT_ANNOUNCEMENT_TICKERS: AnnouncementTicker[] = [
+  {
+    id: 'tick-1',
+    text: '📢 Special Offer: Get 20% OFF on all Premium Services! Use code: PREMIUM20',
+    link: '#offers',
+    color: 'gold',
+    expiryDate: '2026-07-15',
+    enabled: true
+  },
+  {
+    id: 'tick-2',
+    text: '🌟 Introducing our new Therapist Kiara Sen, Specializing in Reflexology & Deep Foot Spa!',
+    link: '#staff',
+    color: 'green',
+    expiryDate: '2026-07-20',
+    enabled: true
+  }
+];
+
+export const DEFAULT_SOCIAL_FEED_CONFIG: SocialFeedConfig = {
+  instagramUrl: 'https://instagram.com/thewaterlilyspa',
+  enabled: true,
+  posts: [
+    'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=300',
+    'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&q=80&w=300',
+    'https://images.unsplash.com/photo-1600334182424-df0965b81dee?auto=format&fit=crop&q=80&w=300',
+    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&q=80&w=300',
+    'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&q=80&w=300',
+    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&q=80&w=300'
+  ],
+  postsToShow: 6
+};
+
+export const DEFAULT_ATTENDANCE_RECORDS: AttendanceRecord[] = [
+  {
+    date: '2026-06-27',
+    records: {
+      'st-1': 'Present',
+      'st-2': 'Present',
+      'st-3': 'Leave',
+      'st-4': 'Present',
+      'st-5': 'Present'
+    }
+  },
+  {
+    date: '2026-06-28',
+    records: {
+      'st-1': 'Present',
+      'st-2': 'Present',
+      'st-3': 'Present',
+      'st-4': 'Leave',
+      'st-5': 'Present'
+    }
+  }
+];
+
+export const DEFAULT_GIFT_VOUCHERS: GiftVoucher[] = [
+  {
+    id: 'vouch-1',
+    code: 'LILYVOUCH1000',
+    amount: 1000,
+    recipientName: 'Preeti Sharma',
+    recipientEmail: 'preeti@gmail.com',
+    senderName: 'Rajesh Sharma',
+    message: 'Happy Birthday! Treat yourself to a serene day at Water Lily Spa.',
+    deliveryDate: '2026-06-28',
+    used: false,
+    qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=LILYVOUCH1000'
+  },
+  {
+    id: 'vouch-2',
+    code: 'LILYVOUCH2000',
+    amount: 2000,
+    recipientName: 'Sanjay Gupta',
+    recipientEmail: 'sanjay.gupta@yahoo.com',
+    senderName: 'Anil Gupta',
+    message: 'Thanks for all your support, Dad! Enjoy a premium therapeutic therapy.',
+    deliveryDate: '2026-06-26',
+    used: true,
+    qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=LILYVOUCH2000'
+  }
+];
+
+export const DEFAULT_SPA_PACKAGES: SpaPackage[] = [
+  {
+    id: 'pkg-1',
+    name: '🌺 Royal Relaxation Package',
+    services: ['ser-1', 'ser-3', 'ser-5'], // Swedish, Hot Stone, Foot Reflexology
+    price: 5000,
+    duration: 180, // 3 hours
+    benefits: ['Full Body Alignment', 'Hot Stone Cellular Energy Boost', 'Deep Foot Organ Detox', 'VIP Welcome Herbal Tea'],
+    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=600',
+    enabled: true
+  },
+  {
+    id: 'pkg-2',
+    name: '👩‍❤️‍👨 Couple\'s Paradise Suite',
+    services: ['ser-1', 'ser-3'], // Swedish, Hot Stone
+    price: 8000,
+    duration: 120, // 2 hours
+    benefits: ['Private Luxury Suite Access', 'Aroma Candle Environment', 'Dual Synchronous Therapy', 'Premium Sparkling Organic Drinks'],
+    image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&q=80&w=600',
+    enabled: true
+  },
+  {
+    id: 'pkg-3',
+    name: '✨ Detox & Glow',
+    services: ['ser-5', 'ser-7'], // Reflexology, Gold Leaf
+    price: 3500,
+    duration: 120, // 2 hours
+    benefits: ['Intense Cellular Hydration', 'Full Body Exfoliation', 'Herbal Detox Facial Mask', 'Head Massage Add-on'],
+    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&q=80&w=600',
+    enabled: true
+  }
+];
+

@@ -34,9 +34,13 @@ import {
   AlertTriangle,
   Map,
   Navigation,
-  Compass
+  Compass,
+  Sparkles,
+  Award,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
-import { Staff, Service, Offer, Booking, Announcement, Settings, LocationInfo } from '../types';
+import { Staff, Service, Offer, Booking, Announcement, Settings, LocationInfo, TherapistOfTheMonth, ChatConfig, LoyaltyConfig, CountdownConfig, SocialFeed, ChatMessage, CustomerPoints, Review, ReminderConfig, ReminderLog, PriceComparisonConfig, AnnouncementTicker, AttendanceRecord, GiftVoucher, SpaPackage } from '../types';
 
 interface AdminPanelProps {
   staff: Staff[];
@@ -46,6 +50,23 @@ interface AdminPanelProps {
   announcements: Announcement[];
   settings: Settings;
   location: LocationInfo;
+  
+  // New features props
+  therapistOfTheMonth: TherapistOfTheMonth;
+  chatMessages: ChatMessage[];
+  chatConfig?: ChatConfig;
+  loyaltyConfig: LoyaltyConfig;
+  loyaltyPoints: CustomerPoints[];
+  reviews: Review[];
+  reminderConfig: ReminderConfig;
+  reminderLogs: ReminderLog[];
+  priceComparison: PriceComparisonConfig;
+  announcementTickers: AnnouncementTicker[];
+  socialFeed: SocialFeed;
+  attendance: AttendanceRecord[];
+  giftVouchers: GiftVoucher[];
+  spaPackages: SpaPackage[];
+  countdownConfig?: CountdownConfig;
   
   onAddStaff: (member: Staff) => void;
   onUpdateStaff: (member: Staff) => void;
@@ -67,10 +88,26 @@ interface AdminPanelProps {
   
   onUpdateSettings: (settings: Settings) => void;
   onUpdateLocation: (location: LocationInfo) => void;
+  onUpdateTherapistOfTheMonth: (totm: TherapistOfTheMonth) => void;
+  onUpdateChatMessages: (messages: ChatMessage[]) => void;
+  onUpdateChatConfig?: (config: ChatConfig) => void;
+  onUpdateLoyaltyConfig: (config: LoyaltyConfig) => void;
+  onUpdateLoyaltyPoints: (points: CustomerPoints[]) => void;
+  onUpdateReviews: (reviews: Review[]) => void;
+  onUpdateReminderConfig: (config: ReminderConfig) => void;
+  onUpdateReminderLogs: (logs: ReminderLog[]) => void;
+  onUpdatePriceComparison: (config: PriceComparisonConfig) => void;
+  onUpdateAnnouncementTickers: (tickers: AnnouncementTicker[]) => void;
+  onUpdateSocialFeed: (feed: SocialFeed) => void;
+  onUpdateAttendance: (records: AttendanceRecord[]) => void;
+  onUpdateGiftVouchers: (vouchers: GiftVoucher[]) => void;
+  onUpdateSpaPackages: (packages: SpaPackage[]) => void;
+  onUpdateCountdownConfig?: (config: CountdownConfig) => void;
+  
   onCloseAdmin: () => void;
 }
 
-type AdminTab = 'dashboard' | 'staff' | 'services' | 'offers' | 'bookings' | 'announcements' | 'settings';
+type AdminTab = 'dashboard' | 'staff' | 'services' | 'packages' | 'offers' | 'bookings' | 'announcements' | 'settings';
 
 export default function AdminPanel({
   staff,
@@ -80,6 +117,21 @@ export default function AdminPanel({
   announcements,
   settings,
   location,
+  therapistOfTheMonth,
+  chatMessages,
+  chatConfig,
+  loyaltyConfig,
+  loyaltyPoints,
+  reviews,
+  reminderConfig,
+  reminderLogs,
+  priceComparison,
+  announcementTickers,
+  socialFeed,
+  attendance,
+  giftVouchers,
+  spaPackages,
+  countdownConfig,
   onAddStaff,
   onUpdateStaff,
   onDeleteStaff,
@@ -95,6 +147,21 @@ export default function AdminPanel({
   onDeleteAnnouncement,
   onUpdateSettings,
   onUpdateLocation,
+  onUpdateTherapistOfTheMonth,
+  onUpdateChatMessages,
+  onUpdateChatConfig,
+  onUpdateLoyaltyConfig,
+  onUpdateLoyaltyPoints,
+  onUpdateReviews,
+  onUpdateReminderConfig,
+  onUpdateReminderLogs,
+  onUpdatePriceComparison,
+  onUpdateAnnouncementTickers,
+  onUpdateSocialFeed,
+  onUpdateAttendance,
+  onUpdateGiftVouchers,
+  onUpdateSpaPackages,
+  onUpdateCountdownConfig,
   onCloseAdmin
 }: AdminPanelProps) {
   
@@ -151,6 +218,71 @@ export default function AdminPanel({
   const [newStaffHours, setNewStaffHours] = useState('9:00 AM - 5:00 PM');
   const [newStaffStatus, setNewStaffStatus] = useState<'Active' | 'Inactive'>('Active');
   const [newStaffOnline, setNewStaffOnline] = useState(true);
+  const [newStaffBio, setNewStaffBio] = useState('');
+  const [newStaffGallery, setNewStaffGallery] = useState('');
+  const [newStaffBadge, setNewStaffBadge] = useState('');
+  const [newStaffRating, setNewStaffRating] = useState(5);
+  const [singleGalleryUrlInput, setSingleGalleryUrlInput] = useState('');
+
+  const handleAddSingleGalleryUrl = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!singleGalleryUrlInput.trim()) return;
+    const currentPhotos = newStaffGallery
+      ? newStaffGallery.split(',').map(url => url.trim()).filter(url => url.length > 0)
+      : [];
+    const updated = [...currentPhotos, singleGalleryUrlInput.trim()].join(', ');
+    setNewStaffGallery(updated);
+    setSingleGalleryUrlInput('');
+  };
+
+  // --- FILE UPLOAD HELPERS FOR THERAPISTS (थेरेपिस्ट फ़ोटो अपलोड सहायक) ---
+  const handleMainPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setNewStaffPhoto(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleGalleryPhotosUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const currentPhotos = newStaffGallery
+        ? newStaffGallery.split(',').map(url => url.trim()).filter(url => url.length > 0)
+        : [];
+      
+      let processedCount = 0;
+      const newUrls: string[] = [];
+
+      Array.from(files).forEach((file: File) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === 'string') {
+            newUrls.push(reader.result);
+          }
+          processedCount++;
+          if (processedCount === files.length) {
+            const updated = [...currentPhotos, ...newUrls].join(', ');
+            setNewStaffGallery(updated);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const handleDeleteGalleryPhoto = (indexToDelete: number) => {
+    const currentPhotos = newStaffGallery
+      ? newStaffGallery.split(',').map(url => url.trim()).filter(url => url.length > 0)
+      : [];
+    const updated = currentPhotos.filter((_, idx) => idx !== indexToDelete).join(', ');
+    setNewStaffGallery(updated);
+  };
 
   // --- SERVICES TAB STATES ---
   const [showAddServiceModal, setShowAddServiceModal] = useState(false);
@@ -165,6 +297,18 @@ export default function AdminPanel({
   const [newSerDuration, setNewSerDuration] = useState('');
   const [newSerImage, setNewSerImage] = useState('');
   const [newSerAvailable, setNewSerAvailable] = useState<'Yes' | 'No'>('Yes');
+
+  // --- SPA PACKAGES TAB STATES ---
+  const [editingPackage, setEditingPackage] = useState<SpaPackage | null>(null);
+  const [showPackageModal, setShowPackageModal] = useState(false);
+  const [newPkgName, setNewPkgName] = useState('');
+  const [newPkgPrice, setNewPkgPrice] = useState('');
+  const [newPkgCouplePrice, setNewPkgCouplePrice] = useState('');
+  const [newPkgDuration, setNewPkgDuration] = useState('120');
+  const [newPkgDesc, setNewPkgDesc] = useState('');
+  const [newPkgImage, setNewPkgImage] = useState('');
+  const [newPkgEnabled, setNewPkgEnabled] = useState(true);
+  const [newPkgIncluded, setNewPkgIncluded] = useState(''); // Comma separated list
 
   // --- OFFERS TAB STATES ---
   const [showAddOfferModal, setShowAddOfferModal] = useState(false);
@@ -215,6 +359,74 @@ export default function AdminPanel({
   const [locMapUrl, setLocMapUrl] = useState(location.mapUrl);
   const [locLatitude, setLocLatitude] = useState(location.latitude);
   const [locLongitude, setLocLongitude] = useState(location.longitude);
+
+  // --- PREMIUM CONFIG STATES (प्रीमियम फीचर्स स्टेट्स) ---
+  const [totmTherapistId, setTotmTherapistId] = useState(therapistOfTheMonth?.staffId || '');
+  const [totmEnabled, setTotmEnabled] = useState(therapistOfTheMonth?.enabled || false);
+  const [totmMessage, setTotmMessage] = useState(therapistOfTheMonth?.customMessage || 'Most Booked This Month');
+
+  const [chatWelcomeMsg, setChatWelcomeMsg] = useState(chatConfig?.welcomeMessage || 'Welcome to The Water Lily Spa! How can we help you today?');
+  const [chatDelaySec, setChatDelaySec] = useState(chatConfig?.delaySeconds || 2);
+
+  const [loyaltyEnabled, setLoyaltyEnabled] = useState(loyaltyConfig?.enabled || false);
+  const [loyaltyPointsPerBooking, setLoyaltyPointsPerBooking] = useState(loyaltyConfig?.pointsPerBooking || 100);
+  const [loyaltyMinPoints, setLoyaltyMinPoints] = useState(loyaltyConfig?.minPointsToRedeem || 500);
+  const [loyaltyPointValue, setLoyaltyPointValue] = useState(loyaltyConfig?.pointValue || 1);
+
+  const [countdownEnabled, setCountdownEnabled] = useState(countdownConfig?.enabled || false);
+  const [countdownLabel, setCountdownLabel] = useState(countdownConfig?.label || 'HURRY! FLASH DEAL ENDS IN:');
+  const [countdownHoursVal, setCountdownHoursVal] = useState(countdownConfig?.hours || 24);
+
+  const [instgHandle, setInstgHandle] = useState(socialFeed?.instagramHandle || '@thewaterlilyspa');
+  const [instgEnabled, setInstgEnabled] = useState(socialFeed?.enabled || false);
+
+  const handlePremiumFeaturesSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onUpdateTherapistOfTheMonth({
+      staffId: totmTherapistId,
+      enabled: totmEnabled,
+      customMessage: totmMessage
+    });
+    if (onUpdateChatConfig) {
+      onUpdateChatConfig({
+        welcomeMessage: chatWelcomeMsg,
+        delaySeconds: chatDelaySec
+      });
+    } else {
+      localStorage.setItem('wls_chat_config_db', JSON.stringify({
+        welcomeMessage: chatWelcomeMsg,
+        delaySeconds: chatDelaySec
+      }));
+    }
+    onUpdateLoyaltyConfig({
+      enabled: loyaltyEnabled,
+      pointsPerBooking: loyaltyPointsPerBooking,
+      minPointsToRedeem: loyaltyMinPoints,
+      pointValue: loyaltyPointValue,
+      pointsValue: loyaltyPointValue
+    });
+    if (onUpdateCountdownConfig) {
+      onUpdateCountdownConfig({
+        enabled: countdownEnabled,
+        label: countdownLabel,
+        hours: countdownHoursVal
+      });
+    } else {
+      localStorage.setItem('wls_countdown_config_db', JSON.stringify({
+        enabled: countdownEnabled,
+        label: countdownLabel,
+        hours: countdownHoursVal
+      }));
+    }
+    onUpdateSocialFeed({
+      enabled: instgEnabled,
+      instagramHandle: instgHandle,
+      instagramUrl: `https://instagram.com/${instgHandle.replace('@', '')}`,
+      posts: socialFeed?.posts || [],
+      postsToShow: socialFeed?.postsToShow || 6
+    });
+    alert('Premium Configurations saved & applied successfully! (प्रीमियम फीचर्स सेटिंग्स सफलतापूर्वक सहेजी गईं)');
+  };
 
   const handleLocationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -355,6 +567,10 @@ export default function AdminPanel({
     setNewStaffHours('9:00 AM - 5:00 PM');
     setNewStaffStatus('Active');
     setNewStaffOnline(true);
+    setNewStaffBio('');
+    setNewStaffGallery('');
+    setNewStaffBadge('');
+    setNewStaffRating(5);
     setShowAddStaffModal(true);
   };
 
@@ -371,11 +587,19 @@ export default function AdminPanel({
     setNewStaffHours(member.workingHours);
     setNewStaffStatus(member.status);
     setNewStaffOnline(member.online);
+    setNewStaffBio(member.biography || '');
+    setNewStaffGallery((member.galleryPhotos || []).join(', '));
+    setNewStaffBadge(member.featuredBadge || '');
+    setNewStaffRating(member.rating || 5);
     setShowAddStaffModal(true);
   };
 
   const handleStaffSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const galleryArr = newStaffGallery
+      ? newStaffGallery.split(',').map(url => url.trim()).filter(url => url.length > 0)
+      : [];
+
     const payload: Staff = {
       id: editingStaff ? editingStaff.id : `st-${Date.now()}`,
       name: newStaffName,
@@ -388,7 +612,11 @@ export default function AdminPanel({
       email: newStaffEmail,
       workingHours: newStaffHours,
       status: newStaffStatus,
-      online: newStaffOnline
+      online: newStaffOnline,
+      biography: newStaffBio,
+      galleryPhotos: galleryArr,
+      featuredBadge: newStaffBadge,
+      rating: Number(newStaffRating)
     };
 
     if (editingStaff) {
@@ -451,6 +679,69 @@ export default function AdminPanel({
       onAddService(payload);
     }
     setShowAddServiceModal(false);
+  };
+
+  // --- ADD / EDIT SPA PACKAGE ACTION HANDLERS (पैकेज CRUD) ---
+  const openAddPackage = () => {
+    setEditingPackage(null);
+    setNewPkgName('');
+    setNewPkgPrice('');
+    setNewPkgCouplePrice('');
+    setNewPkgDuration('120');
+    setNewPkgDesc('');
+    setNewPkgImage('https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&q=80&w=600');
+    setNewPkgEnabled(true);
+    setNewPkgIncluded('Full Body Massage, Steam Bath, Herbal Tea');
+    setShowPackageModal(true);
+  };
+
+  const openEditPackage = (pkg: SpaPackage) => {
+    setEditingPackage(pkg);
+    setNewPkgName(pkg.name);
+    setNewPkgPrice(String(pkg.price));
+    setNewPkgCouplePrice(String(pkg.couplePrice || ''));
+    setNewPkgDuration(String(pkg.duration));
+    setNewPkgDesc(pkg.description || '');
+    setNewPkgImage(pkg.image);
+    setNewPkgEnabled(pkg.enabled);
+    setNewPkgIncluded((pkg.includedServices || pkg.benefits || []).join(', '));
+    setShowPackageModal(true);
+  };
+
+  const handlePackageSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const includedArray = newPkgIncluded
+      .split(',')
+      .map(item => item.trim())
+      .filter(Boolean);
+
+    const payload: SpaPackage = {
+      id: editingPackage ? editingPackage.id : `pkg-${Date.now()}`,
+      name: newPkgName,
+      price: Number(newPkgPrice) || 2000,
+      couplePrice: newPkgCouplePrice ? Number(newPkgCouplePrice) : undefined,
+      duration: Number(newPkgDuration) || 120,
+      description: newPkgDesc,
+      image: newPkgImage || 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&q=80&w=600',
+      enabled: newPkgEnabled,
+      includedServices: includedArray,
+      services: [],
+      benefits: includedArray
+    };
+
+    const updatedPackages = editingPackage
+      ? spaPackages.map(p => p.id === payload.id ? payload : p)
+      : [...spaPackages, payload];
+
+    onUpdateSpaPackages(updatedPackages);
+    setShowPackageModal(false);
+  };
+
+  const handleDeletePackage = (id: string) => {
+    if (confirm('Are you sure you want to delete this spa package? (क्या आप वाकई इस पैकेज को हटाना चाहते हैं?)')) {
+      const updatedPackages = spaPackages.filter(p => p.id !== id);
+      onUpdateSpaPackages(updatedPackages);
+    }
   };
 
   // --- ADD OFFER HANDLER (ऑफर CRUD) ---
@@ -665,6 +956,7 @@ export default function AdminPanel({
             { id: 'dashboard', label: '📊 Dashboard', icon: LayoutDashboard },
             { id: 'staff', label: '👥 Staff Management', icon: Users },
             { id: 'services', label: '💆 Service Management', icon: Briefcase },
+            { id: 'packages', label: '🌸 Spa Packages', icon: Sparkles },
             { id: 'offers', label: '🎯 Offers & Coupons', icon: Tag },
             { id: 'bookings', label: '📅 Bookings Desk', icon: CalendarCheck },
             { id: 'announcements', label: '📢 Announcements', icon: Megaphone },
@@ -718,6 +1010,7 @@ export default function AdminPanel({
             {activeTab === 'dashboard' && '📊 Executive Dashboard Analytics'}
             {activeTab === 'staff' && '👥 Spa Therapists & Roster Control'}
             {activeTab === 'services' && '💆 Healing Therapies Catalog'}
+            {activeTab === 'packages' && '🌸 Signature Spa Packages'}
             {activeTab === 'offers' && '🎯 Promotional Coupons Setup'}
             {activeTab === 'bookings' && '📅 Appointments Log & Registry'}
             {activeTab === 'announcements' && '📢 Broadcast Bulletins & Notices'}
@@ -1258,6 +1551,110 @@ export default function AdminPanel({
                 </div>
               </div>
 
+            </div>
+          )}
+
+
+          {/* ==========================================
+              SUB-VIEW: SPA SIGNATURE PACKAGES
+              ========================================== */}
+          {activeTab === 'packages' && (
+            <div className="space-y-6 animate-in fade-in duration-200">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 lg:p-6 rounded-xl border border-neutral-200 shadow-xs">
+                <div>
+                  <h3 className="text-sm font-bold text-[#1a472a] uppercase tracking-wider font-serif">Signature Spa Packages (सिग्नेचर स्पा पैकेज)</h3>
+                  <p className="text-[11px] text-neutral-400">Create, edit and manage custom premium packages containing multiple treatments.</p>
+                </div>
+                <button
+                  onClick={openAddPackage}
+                  className="bg-[#1a472a] hover:bg-[#d4af37] hover:text-[#1a472a] text-white text-xs font-bold py-2 px-4 rounded-lg flex items-center gap-1.5 transition-all shadow-xs"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Create Spa Package (नया पैकेज जोड़ें)</span>
+                </button>
+              </div>
+
+              {/* Packages List Table */}
+              <div className="bg-white rounded-xl border border-neutral-200 shadow-xs overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-neutral-200 text-neutral-400 font-bold uppercase tracking-wider text-[10px]">
+                        <th className="py-3 px-4">Image</th>
+                        <th className="py-3 px-4">Package Name</th>
+                        <th className="py-3 px-4">Duration</th>
+                        <th className="py-3 px-4">Single Price</th>
+                        <th className="py-3 px-4">Couple Price</th>
+                        <th className="py-3 px-4">Included Treatments</th>
+                        <th className="py-3 px-4">Status</th>
+                        <th className="py-3 px-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-100">
+                      {!spaPackages || spaPackages.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="p-8 text-center text-neutral-400">No spa packages registered yet. Click Create above!</td>
+                        </tr>
+                      ) : (
+                        spaPackages.map(pkg => (
+                          <tr key={pkg.id} className="hover:bg-neutral-50/50 transition-colors">
+                            <td className="p-4">
+                              <img src={pkg.image} alt={pkg.name} className="h-10 w-16 rounded object-cover border border-neutral-200 shrink-0" referrerPolicy="no-referrer" />
+                            </td>
+                            <td className="p-4">
+                              <p className="font-bold text-neutral-800">{pkg.name}</p>
+                              <p className="text-[10px] text-neutral-400 font-mono">ID: {pkg.id}</p>
+                            </td>
+                            <td className="p-4 font-mono font-bold text-neutral-600">
+                              {pkg.duration} Mins
+                            </td>
+                            <td className="p-4 font-bold text-[#1a472a]">
+                              ₹{pkg.price}
+                            </td>
+                            <td className="p-4 font-bold text-slate-500">
+                              {pkg.couplePrice ? `₹${pkg.couplePrice}` : 'N/A'}
+                            </td>
+                            <td className="p-4">
+                              <div className="flex flex-wrap gap-1 max-w-xs">
+                                {(pkg.includedServices || pkg.benefits || []).map((srv, idx) => (
+                                  <span key={idx} className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[9px] font-medium border border-slate-200">
+                                    {srv}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                                pkg.enabled ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'
+                              }`}>
+                                {pkg.enabled ? 'Enabled' : 'Disabled'}
+                              </span>
+                            </td>
+                            <td className="p-4 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  onClick={() => openEditPackage(pkg)}
+                                  className="p-1.5 text-slate-500 hover:text-[#1a472a] hover:bg-[#1a472a]/5 rounded"
+                                  title="Edit Package"
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeletePackage(pkg.id)}
+                                  className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded"
+                                  title="Delete Package"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           )}
 
@@ -2143,6 +2540,258 @@ export default function AdminPanel({
                 </form>
               </div>
 
+              {/* --- PREMIUM FEATURES & INTEGRATIONS CONFIGURATION PANEL (प्रीमियम फीचर्स सेटिंग्स) --- */}
+              <div className="bg-white rounded-xl border border-neutral-200 shadow-xs p-6 lg:p-8 text-neutral-800">
+                <div className="flex items-center gap-2 border-b pb-2 mb-6">
+                  <Sparkles className="h-5 w-5 text-[#d4af37]" />
+                  <h4 className="text-sm font-bold text-[#1a472a] uppercase tracking-wider font-serif">
+                    🌟 Spa Premium Features & Marketing Control
+                  </h4>
+                </div>
+
+                <form onSubmit={handlePremiumFeaturesSubmit} className="space-y-8 text-xs">
+                  
+                  {/* 1. THERAPIST OF THE MONTH */}
+                  <div className="bg-[#ebe4d8]/20 p-4 rounded-xl space-y-4 border border-[#d4af37]/20">
+                    <h5 className="font-serif font-bold text-neutral-800 text-sm flex items-center gap-1">
+                      👑 Therapist of the Month Spotlight
+                    </h5>
+                    <p className="text-neutral-500 leading-relaxed text-[11px]">
+                      Select the outstanding therapist of the month to feature in the main directory spotlight with a gold royal border, crown symbol, glowing visual badges, and personalized quotes.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                      <div className="space-y-1">
+                        <label className="font-bold text-neutral-500 block">Select Therapist Spotlight</label>
+                        <select 
+                          value={totmTherapistId}
+                          onChange={(e) => setTotmTherapistId(e.target.value)}
+                          className="w-full p-2.5 rounded border border-neutral-300 bg-white"
+                        >
+                          {staff && staff.map(st => (
+                            <option key={st.id} value={st.id}>{st.name} ({st.specialization})</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5 flex items-center h-12">
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <input 
+                            type="checkbox"
+                            checked={totmEnabled}
+                            onChange={(e) => setTotmEnabled(e.target.checked)}
+                            className="rounded text-[#1a472a] focus:ring-[#1a472a] h-4 w-4"
+                          />
+                          <span className="font-bold text-neutral-600">Activate Spotlight Border & Glow</span>
+                        </label>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-neutral-500 block">Spotlight Message Badge</label>
+                        <input 
+                          type="text"
+                          value={totmMessage}
+                          onChange={(e) => setTotmMessage(e.target.value)}
+                          className="w-full p-2.5 rounded border border-neutral-300"
+                          placeholder="e.g. Most Booked This Month"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 2. CHAT BOT INTEGRATION */}
+                  <div className="bg-[#ebe4d8]/20 p-4 rounded-xl space-y-4 border border-[#d4af37]/20">
+                    <h5 className="font-serif font-bold text-neutral-800 text-sm flex items-center gap-1">
+                      💬 Live Chat Agent Automation
+                    </h5>
+                    <p className="text-neutral-500 leading-relaxed text-[11px]">
+                      Set up the artificial intelligence chat client welcome message and simulated desk reply intervals (in seconds) to drive real-time public visitor conversations.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-bold text-neutral-500 block">Chat Greeting Welcome Message</label>
+                        <input 
+                          type="text"
+                          required
+                          value={chatWelcomeMsg}
+                          onChange={(e) => setChatWelcomeMsg(e.target.value)}
+                          className="w-full p-2.5 rounded border border-neutral-300"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-bold text-neutral-500 block">Simulated Response Delay (seconds)</label>
+                        <input 
+                          type="number"
+                          required
+                          min={1}
+                          max={30}
+                          value={chatDelaySec}
+                          onChange={(e) => setChatDelaySec(Number(e.target.value))}
+                          className="w-full p-2.5 rounded border border-neutral-300"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. LOYALTY CARD PROGRAM */}
+                  <div className="bg-[#ebe4d8]/20 p-4 rounded-xl space-y-4 border border-[#d4af37]/20">
+                    <h5 className="font-serif font-bold text-[#1a472a] text-sm flex items-center gap-1">
+                      ⭐ Guest Loyalty Points Club Setup
+                    </h5>
+                    <p className="text-neutral-500 leading-relaxed text-[11px]">
+                      Configure point parameters for checkout logs. Members redeem reward multipliers to purchase priority companion tickets, Jacuzzis, or aromatherapy oils.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-bold text-neutral-500 block">Loyalty Program Status</label>
+                        <select 
+                          value={loyaltyEnabled ? 'true' : 'false'}
+                          onChange={(e) => setLoyaltyEnabled(e.target.value === 'true')}
+                          className="w-full p-2.5 rounded border border-neutral-300 bg-white"
+                        >
+                          <option value="true">Active & Visible</option>
+                          <option value="false">Paused & Hidden</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-neutral-500 block">Points Awarded Per Booking</label>
+                        <input 
+                          type="number"
+                          required
+                          min={10}
+                          max={1000}
+                          value={loyaltyPointsPerBooking}
+                          onChange={(e) => setLoyaltyPointsPerBooking(Number(e.target.value))}
+                          className="w-full p-2.5 rounded border border-neutral-300"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-neutral-500 block">Minimum Points to Redeem</label>
+                        <input 
+                          type="number"
+                          required
+                          min={50}
+                          max={5000}
+                          value={loyaltyMinPoints}
+                          onChange={(e) => setLoyaltyMinPoints(Number(e.target.value))}
+                          className="w-full p-2.5 rounded border border-neutral-300"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-neutral-500 block">Point Cash Value (₹ per point)</label>
+                        <input 
+                          type="number"
+                          required
+                          min={1}
+                          max={100}
+                          value={loyaltyPointValue}
+                          onChange={(e) => setLoyaltyPointValue(Number(e.target.value))}
+                          className="w-full p-2.5 rounded border border-neutral-300"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 4. EXCLUSIVE FLASH OFFERS COUNTDOWN */}
+                  <div className="bg-[#ebe4d8]/20 p-4 rounded-xl space-y-4 border border-[#d4af37]/20">
+                    <h5 className="font-serif font-bold text-[#1a472a] text-sm flex items-center gap-1">
+                      ⏳ Exclusive Offers Flash Countdown Timer
+                    </h5>
+                    <p className="text-neutral-500 leading-relaxed text-[11px]">
+                      Enable an active visual countdown clock above your coupon listings to induce guest booking urgency. Customize expiry duration in hours.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-bold text-neutral-500 block">Timer Status</label>
+                        <select 
+                          value={countdownEnabled ? 'true' : 'false'}
+                          onChange={(e) => setCountdownEnabled(e.target.value === 'true')}
+                          className="w-full p-2.5 rounded border border-neutral-300 bg-white"
+                        >
+                          <option value="true">Active & Counting</option>
+                          <option value="false">Deactivated</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-neutral-500 block">Timer Urgent Headline Label</label>
+                        <input 
+                          type="text"
+                          required
+                          value={countdownLabel}
+                          onChange={(e) => setCountdownLabel(e.target.value)}
+                          className="w-full p-2.5 rounded border border-neutral-300"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-neutral-500 block">Time Remaining (Hours)</label>
+                        <input 
+                          type="number"
+                          required
+                          min={1}
+                          max={72}
+                          value={countdownHoursVal}
+                          onChange={(e) => setCountdownHoursVal(Number(e.target.value))}
+                          className="w-full p-2.5 rounded border border-neutral-300"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 5. INSTAGRAM SOCIAL FEED HANDLER */}
+                  <div className="bg-[#ebe4d8]/20 p-4 rounded-xl space-y-4 border border-[#d4af37]/20">
+                    <h5 className="font-serif font-bold text-[#1a472a] text-sm flex items-center gap-1">
+                      📸 Instagram Social Feed Display
+                    </h5>
+                    <p className="text-neutral-500 leading-relaxed text-[11px]">
+                      Manage the visual scent and serenity social media feed handle on the landing page footer.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-bold text-neutral-500 block">Instagram Public Handle</label>
+                        <input 
+                          type="text"
+                          required
+                          value={instgHandle}
+                          onChange={(e) => setInstgHandle(e.target.value)}
+                          className="w-full p-2.5 rounded border border-neutral-300 font-mono"
+                          placeholder="e.g. @thewaterlilyspa"
+                        />
+                      </div>
+                      <div className="space-y-1 h-12 flex items-center">
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <input 
+                            type="checkbox"
+                            checked={instgEnabled}
+                            onChange={(e) => setInstgEnabled(e.target.checked)}
+                            className="rounded text-[#1a472a] focus:ring-[#1a472a] h-4 w-4"
+                          />
+                          <span className="font-bold text-neutral-600">Render Senses Post Grid on Homepage</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Submit premium features configurations */}
+                  <div className="pt-4 border-t border-neutral-100 flex justify-end">
+                    <button
+                      type="submit"
+                      className="py-2.5 px-6 bg-[#1a472a] hover:bg-[#d4af37] hover:text-[#1a472a] text-white font-bold rounded-lg text-xs uppercase tracking-wider shadow-sm transition-all flex items-center gap-2"
+                    >
+                      <Sparkles className="h-4 w-4" /> Save Premium Configurations
+                    </button>
+                  </div>
+                </form>
+              </div>
+
             </div>
           )}
 
@@ -2193,16 +2842,58 @@ export default function AdminPanel({
                 </div>
               </div>
 
-              <div className="space-y-1 text-xs">
-                <label className="font-bold text-neutral-500">Profile Photo URL *</label>
-                <input 
-                  type="url"
-                  required
-                  placeholder="https://images.unsplash.com/photo-..."
-                  value={newStaffPhoto}
-                  onChange={(e) => setNewStaffPhoto(e.target.value)}
-                  className="w-full p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a]"
-                />
+              <div className="space-y-2 p-3 bg-neutral-50 rounded-lg border border-neutral-200 text-xs">
+                <span className="font-bold text-neutral-600 block">Therapist Profile Photo * (मुख्य प्रोफ़ाइल फ़ोटो)</span>
+                
+                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                  {/* Photo Preview Frame */}
+                  <div className="h-20 w-20 rounded-lg overflow-hidden border border-[#d4af37]/30 bg-neutral-100 flex items-center justify-center shrink-0 relative group">
+                    {newStaffPhoto ? (
+                      <img src={newStaffPhoto} alt="Staff Preview" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+                    ) : (
+                      <ImageIcon className="h-8 w-8 text-neutral-400" />
+                    )}
+                  </div>
+
+                  {/* Upload Controls & URL fallback */}
+                  <div className="flex-1 space-y-2 w-full">
+                    <div className="flex items-center gap-2">
+                      <label 
+                        htmlFor="main-photo-file" 
+                        className="cursor-pointer bg-[#1a472a] hover:bg-[#d4af37] hover:text-[#1a472a] text-white px-3 py-1.5 rounded font-bold text-[11px] transition-colors flex items-center gap-1 shadow-xs"
+                      >
+                        <Upload className="h-3.5 w-3.5" /> Upload Photo File (फ़ोटो अपलोड करें)
+                      </label>
+                      <input 
+                        type="file" 
+                        id="main-photo-file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleMainPhotoUpload} 
+                      />
+                      {newStaffPhoto && (
+                        <button 
+                          type="button"
+                          onClick={() => setNewStaffPhoto('')}
+                          className="text-rose-600 hover:underline text-[11px] font-bold"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-neutral-400 block">Or paste image URL instead (या यहाँ फ़ोटो लिंक डालें):</span>
+                      <input 
+                        type="url"
+                        placeholder="e.g. https://images.unsplash.com/photo-..."
+                        value={newStaffPhoto}
+                        onChange={(e) => setNewStaffPhoto(e.target.value)}
+                        className="w-full p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a] text-xs bg-white"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -2305,6 +2996,129 @@ export default function AdminPanel({
                     <option value="Yes">🟢 Live Online</option>
                     <option value="No">🔴 Offline</option>
                   </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="space-y-1">
+                  <label className="font-bold text-neutral-500">Featured Highlight Badge (विशेष टैग / मेडल)</label>
+                  <input 
+                    type="text"
+                    placeholder="e.g. Master Healer, Swedish Expert"
+                    value={newStaffBadge}
+                    onChange={(e) => setNewStaffBadge(e.target.value)}
+                    className="w-full p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a]"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-neutral-500">Therapist Rating Star Score (रेटिंग स्कोर)</label>
+                  <select
+                    value={newStaffRating}
+                    onChange={(e) => setNewStaffRating(Number(e.target.value))}
+                    className="w-full p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a]"
+                  >
+                    <option value="5">⭐⭐⭐⭐⭐ (5.0 / 5.0)</option>
+                    <option value="4">⭐⭐⭐⭐ (4.0 / 5.0)</option>
+                    <option value="3">⭐⭐⭐ (3.0 / 5.0)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1 text-xs">
+                <label className="font-bold text-neutral-500">Detailed Biography / Professional Therapy Style (विस्तृत विवरण और विशेषज्ञता विवरण)</label>
+                <textarea 
+                  rows={3}
+                  placeholder="Describe the therapist's training, therapeutic style, certified techniques, and friendly demeanor so clients know their expertise..."
+                  value={newStaffBio}
+                  onChange={(e) => setNewStaffBio(e.target.value)}
+                  className="w-full p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a]"
+                />
+              </div>
+
+              <div className="space-y-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-neutral-600 block">Portfolio Gallery Photos (थेरेपिस्ट गैलरी फ़ोटो)</span>
+                  <span className="text-[10px] text-[#1a472a] font-mono font-bold bg-[#d4af37]/20 px-2 py-0.5 rounded">
+                    {newStaffGallery ? newStaffGallery.split(',').filter(x => x.trim()).length : 0} Photos Added
+                  </span>
+                </div>
+
+                {/* Multiple File Drag/Drop Upload Box */}
+                <div className="border-2 border-dashed border-neutral-300 hover:border-[#1a472a] rounded-lg p-4 bg-white text-center transition-colors relative cursor-pointer group">
+                  <input 
+                    type="file" 
+                    id="gallery-photos-file" 
+                    accept="image/*" 
+                    multiple 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                    onChange={handleGalleryPhotosUpload} 
+                  />
+                  <div className="space-y-1 text-neutral-500 flex flex-col items-center">
+                    <Upload className="h-6 w-6 text-neutral-400 group-hover:text-[#1a472a] transition-colors" />
+                    <p className="text-[11px] font-bold text-neutral-700">
+                      Drag & Drop or Click to Upload Multiple Photos
+                    </p>
+                    <p className="text-[10px] text-neutral-400">
+                      (एक साथ कई फ़ोटो चुनें या यहाँ खींचें - Base64 समर्थित)
+                    </p>
+                  </div>
+                </div>
+
+                {/* Grid preview of current gallery photos */}
+                {newStaffGallery && newStaffGallery.split(',').map(url => url.trim()).filter(url => url.length > 0).length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Active Gallery Portfolio (गैलरी फ़ोटो सूची - क्लिक करके डिलीट करें):</p>
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                      {newStaffGallery.split(',').map(url => url.trim()).filter(url => url.length > 0).map((url, idx) => (
+                        <div key={idx} className="aspect-square rounded-lg border border-neutral-200 overflow-hidden relative group bg-neutral-100">
+                          <img src={url} alt={`Gallery index ${idx}`} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteGalleryPhoto(idx)}
+                            className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold"
+                            title="Remove Photo"
+                          >
+                            <Trash2 className="h-4 w-4 text-rose-400" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Single Link Adder Field */}
+                <div className="space-y-1 bg-white p-2.5 rounded-lg border border-neutral-200">
+                  <label className="text-[10px] text-neutral-500 font-bold block uppercase tracking-wider">🔗 Add Photo Link One-By-One (एक-एक करके लिंक जोड़ें):</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="url"
+                      placeholder="Paste single photo URL (e.g. https://website.com/photo.png)"
+                      value={singleGalleryUrlInput}
+                      onChange={(e) => setSingleGalleryUrlInput(e.target.value)}
+                      className="flex-1 p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a] text-xs font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddSingleGalleryUrl}
+                      className="bg-[#1a472a] hover:bg-[#d4af37] hover:text-[#1a472a] text-white px-3.5 py-2 rounded text-xs font-bold transition-all shrink-0 shadow-xs"
+                    >
+                      Add Photo (जोड़ें)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Textarea for raw URLs, if they want to copy/paste/fine-tune */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-neutral-400 block font-bold">Or paste manual comma-separated URLs (या यहाँ अल्पविराम से अलग किए गए URLs डालें):</label>
+                  <textarea 
+                    rows={2}
+                    placeholder="https://images.unsplash.com/photo-1, https://images.unsplash.com/photo-2"
+                    value={newStaffGallery}
+                    onChange={(e) => setNewStaffGallery(e.target.value)}
+                    className="w-full p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a] text-[11px] bg-white font-mono"
+                  />
+                  <p className="text-[10px] text-neutral-400">Every photo added here will be beautifully shown in the interactive portfolio gallery when clients click on this therapist's profile.</p>
                 </div>
               </div>
 
@@ -2462,6 +3276,145 @@ export default function AdminPanel({
                   className="px-4 py-2 bg-[#1a472a] text-white hover:bg-[#d4af37] hover:text-[#1a472a] rounded"
                 >
                   {editingService ? 'Save Changes' : 'Catalog Massage'}
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      )}
+
+
+      {/* ==========================================
+          MODAL: ADD/EDIT SPA PACKAGE
+          ========================================== */}
+      {showPackageModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 font-sans">
+          <div className="bg-white rounded-xl shadow-2xl border border-neutral-200 w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            
+            <div className="bg-[#1a472a] text-white p-4 flex items-center justify-between border-b border-[#d4af37]/20">
+              <h4 className="font-serif font-bold text-md flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-[#d4af37]" /> {editingPackage ? 'Modify Spa Package (पैकेज संशोधित करें)' : 'Add New Spa Package (नया पैकेज जोड़ें)'}
+              </h4>
+              <button onClick={() => setShowPackageModal(false)} className="text-white hover:text-[#d4af37] p-1"><X className="h-6 w-6" /></button>
+            </div>
+
+            <form onSubmit={handlePackageSubmit} className="p-6 space-y-4 max-h-[500px] overflow-y-auto">
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="space-y-1 col-span-2">
+                  <label className="font-bold text-neutral-500">Package Name * (पैकेज का नाम)</label>
+                  <input 
+                    type="text"
+                    required
+                    placeholder="e.g. Royal Bridal Bliss Package"
+                    value={newPkgName}
+                    onChange={(e) => setNewPkgName(e.target.value)}
+                    className="w-full p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div className="space-y-1">
+                  <label className="font-bold text-neutral-500">Single Price (₹) *</label>
+                  <input 
+                    type="number"
+                    required
+                    placeholder="e.g. 2999"
+                    value={newPkgPrice}
+                    onChange={(e) => setNewPkgPrice(e.target.value)}
+                    className="w-full p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a]"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-neutral-500">Couple Price (₹) (वैकल्पिक)</label>
+                  <input 
+                    type="number"
+                    placeholder="e.g. 4999"
+                    value={newPkgCouplePrice}
+                    onChange={(e) => setNewPkgCouplePrice(e.target.value)}
+                    className="w-full p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a]"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-neutral-500">Duration (Minutes) *</label>
+                  <input 
+                    type="number"
+                    required
+                    placeholder="e.g. 120"
+                    value={newPkgDuration}
+                    onChange={(e) => setNewPkgDuration(e.target.value)}
+                    className="w-full p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a]"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1 text-xs">
+                <label className="font-bold text-neutral-500">Description (पैकेज विवरण)</label>
+                <textarea 
+                  rows={2}
+                  required
+                  placeholder="Describe the overall healing experience, wellness journey flow, and complimentary items included..."
+                  value={newPkgDesc}
+                  onChange={(e) => setNewPkgDesc(e.target.value)}
+                  className="w-full p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a]"
+                />
+              </div>
+
+              <div className="space-y-1 text-xs">
+                <label className="font-bold text-neutral-500">Included Treatments (अल्पविराम से अलग करें) *</label>
+                <input 
+                  type="text"
+                  required
+                  placeholder="e.g. Deep Tissue Massage, Steam Bath, Hot Stones, Organic Fruit juice"
+                  value={newPkgIncluded}
+                  onChange={(e) => setNewPkgIncluded(e.target.value)}
+                  className="w-full p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a]"
+                />
+                <p className="text-[10px] text-neutral-400">Separate each massage or therapy item with a comma (,)</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="space-y-1">
+                  <label className="font-bold text-neutral-500">Display Image URL (इमेज लिंक)</label>
+                  <input 
+                    type="url"
+                    placeholder="https://images.unsplash.com/photo-..."
+                    value={newPkgImage}
+                    onChange={(e) => setNewPkgImage(e.target.value)}
+                    className="w-full p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a] font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-neutral-500">Status (स्थिति)</label>
+                  <select
+                    value={newPkgEnabled ? 'true' : 'false'}
+                    onChange={(e) => setNewPkgEnabled(e.target.value === 'true')}
+                    className="w-full p-2 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-[#1a472a]"
+                  >
+                    <option value="true">Enabled (सक्रिय)</option>
+                    <option value="false">Disabled (निष्क्रिय)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-neutral-100 flex justify-end gap-3 text-xs font-bold">
+                <button 
+                  type="button" 
+                  onClick={() => setShowPackageModal(false)}
+                  className="px-4 py-2 border border-neutral-300 rounded text-neutral-600 hover:bg-neutral-50"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="px-5 py-2 bg-[#1a472a] text-white rounded hover:bg-[#d4af37] hover:text-[#1a472a] transition-all"
+                >
+                  {editingPackage ? 'Save Changes' : 'Create Package'}
                 </button>
               </div>
 

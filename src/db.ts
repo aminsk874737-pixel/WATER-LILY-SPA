@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Staff, Service, Offer, Booking, Announcement, Settings, LocationInfo } from './types';
+import { Staff, Service, Offer, Booking, Announcement, Settings, LocationInfo, TherapistOfTheMonth, ChatMessage, LoyaltyProgramConfig, CustomerPoints, Review, ReminderConfig, ReminderLog, PriceComparisonConfig, AnnouncementTicker, SocialFeedConfig, AttendanceRecord, GiftVoucher, SpaPackage } from './types';
 import {
   DEFAULT_STAFF,
   DEFAULT_SERVICES,
@@ -11,7 +11,20 @@ import {
   DEFAULT_ANNOUNCEMENTS,
   DEFAULT_SETTINGS,
   DEFAULT_BOOKINGS,
-  DEFAULT_LOCATION
+  DEFAULT_LOCATION,
+  DEFAULT_THERAPIST_OF_THE_MONTH,
+  DEFAULT_CHAT_MESSAGES,
+  DEFAULT_LOYALTY_PROGRAM_CONFIG,
+  DEFAULT_CUSTOMER_POINTS,
+  DEFAULT_REVIEWS,
+  DEFAULT_REMINDER_CONFIG,
+  DEFAULT_REMINDER_LOGS,
+  DEFAULT_PRICE_COMPARISON_CONFIG,
+  DEFAULT_ANNOUNCEMENT_TICKERS,
+  DEFAULT_SOCIAL_FEED_CONFIG,
+  DEFAULT_ATTENDANCE_RECORDS,
+  DEFAULT_GIFT_VOUCHERS,
+  DEFAULT_SPA_PACKAGES
 } from './initialData';
 
 const KEYS = {
@@ -21,7 +34,20 @@ const KEYS = {
   ANNOUNCEMENTS: 'wls_announcements_db',
   SETTINGS: 'wls_settings_db',
   BOOKINGS: 'wls_bookings_db',
-  LOCATION: 'location'
+  LOCATION: 'location',
+  THERAPIST_OF_THE_MONTH: 'wls_therapist_month_db',
+  CHAT_MESSAGES: 'wls_chat_messages_db',
+  LOYALTY_CONFIG: 'wls_loyalty_config_db',
+  LOYALTY_POINTS: 'wls_loyalty_points_db',
+  REVIEWS: 'wls_reviews_db',
+  REMINDER_CONFIG: 'wls_reminder_config_db',
+  REMINDER_LOGS: 'wls_reminder_logs_db',
+  PRICE_COMPARISON: 'wls_price_comparison_db',
+  ANNOUNCEMENT_TICKERS: 'wls_announcement_tickers_db',
+  SOCIAL_FEED: 'wls_social_feed_db',
+  ATTENDANCE: 'wls_attendance_db',
+  GIFT_VOUCHERS: 'wls_gift_vouchers_db',
+  SPA_PACKAGES: 'wls_spa_packages_db'
 };
 
 export function getStoredData() {
@@ -31,6 +57,33 @@ export function getStoredData() {
   if (staffStr) {
     try {
       staff = JSON.parse(staffStr);
+      // Migrate missing fields from DEFAULT_STAFF (biography, galleryPhotos, featuredBadge, rating)
+      let staffMigrated = false;
+      staff = staff.map((m: Staff) => {
+        const defaultMember = DEFAULT_STAFF.find((d: Staff) => d.id === m.id);
+        if (defaultMember) {
+          if (!m.biography && defaultMember.biography) {
+            m.biography = defaultMember.biography;
+            staffMigrated = true;
+          }
+          if ((!m.galleryPhotos || m.galleryPhotos.length === 0) && defaultMember.galleryPhotos && defaultMember.galleryPhotos.length > 0) {
+            m.galleryPhotos = defaultMember.galleryPhotos;
+            staffMigrated = true;
+          }
+          if (!m.featuredBadge && defaultMember.featuredBadge) {
+            m.featuredBadge = defaultMember.featuredBadge;
+            staffMigrated = true;
+          }
+          if (!m.rating && defaultMember.rating) {
+            m.rating = defaultMember.rating;
+            staffMigrated = true;
+          }
+        }
+        return m;
+      });
+      if (staffMigrated) {
+        localStorage.setItem(KEYS.STAFF, JSON.stringify(staff));
+      }
     } catch (e) {
       console.error(e);
     }
@@ -140,7 +193,129 @@ export function getStoredData() {
     localStorage.setItem(KEYS.LOCATION, JSON.stringify(DEFAULT_LOCATION));
   }
 
-  return { staff, services, offers, announcements, settings, bookings, location };
+  // 1. Therapist of the Month
+  let therapistOfTheMonth = DEFAULT_THERAPIST_OF_THE_MONTH;
+  const tomStr = localStorage.getItem(KEYS.THERAPIST_OF_THE_MONTH);
+  if (tomStr) {
+    try { therapistOfTheMonth = JSON.parse(tomStr); } catch (e) { console.error(e); }
+  } else {
+    localStorage.setItem(KEYS.THERAPIST_OF_THE_MONTH, JSON.stringify(DEFAULT_THERAPIST_OF_THE_MONTH));
+  }
+
+  // 2. Chat messages
+  let chatMessages = DEFAULT_CHAT_MESSAGES;
+  const chatStr = localStorage.getItem(KEYS.CHAT_MESSAGES);
+  if (chatStr) {
+    try { chatMessages = JSON.parse(chatStr); } catch (e) { console.error(e); }
+  } else {
+    localStorage.setItem(KEYS.CHAT_MESSAGES, JSON.stringify(DEFAULT_CHAT_MESSAGES));
+  }
+
+  // 3. Loyalty Config
+  let loyaltyConfig = DEFAULT_LOYALTY_PROGRAM_CONFIG;
+  const loyaltyCfgStr = localStorage.getItem(KEYS.LOYALTY_CONFIG);
+  if (loyaltyCfgStr) {
+    try { loyaltyConfig = JSON.parse(loyaltyCfgStr); } catch (e) { console.error(e); }
+  } else {
+    localStorage.setItem(KEYS.LOYALTY_CONFIG, JSON.stringify(DEFAULT_LOYALTY_PROGRAM_CONFIG));
+  }
+
+  // 4. Loyalty points
+  let loyaltyPoints = DEFAULT_CUSTOMER_POINTS;
+  const loyaltyPtsStr = localStorage.getItem(KEYS.LOYALTY_POINTS);
+  if (loyaltyPtsStr) {
+    try { loyaltyPoints = JSON.parse(loyaltyPtsStr); } catch (e) { console.error(e); }
+  } else {
+    localStorage.setItem(KEYS.LOYALTY_POINTS, JSON.stringify(DEFAULT_CUSTOMER_POINTS));
+  }
+
+  // 5. Reviews
+  let reviews = DEFAULT_REVIEWS;
+  const revsStr = localStorage.getItem(KEYS.REVIEWS);
+  if (revsStr) {
+    try { reviews = JSON.parse(revsStr); } catch (e) { console.error(e); }
+  } else {
+    localStorage.setItem(KEYS.REVIEWS, JSON.stringify(DEFAULT_REVIEWS));
+  }
+
+  // 6. Reminder config
+  let reminderConfig = DEFAULT_REMINDER_CONFIG;
+  const remCfgStr = localStorage.getItem(KEYS.REMINDER_CONFIG);
+  if (remCfgStr) {
+    try { reminderConfig = JSON.parse(remCfgStr); } catch (e) { console.error(e); }
+  } else {
+    localStorage.setItem(KEYS.REMINDER_CONFIG, JSON.stringify(DEFAULT_REMINDER_CONFIG));
+  }
+
+  // 7. Reminder logs
+  let reminderLogs = DEFAULT_REMINDER_LOGS;
+  const remLogsStr = localStorage.getItem(KEYS.REMINDER_LOGS);
+  if (remLogsStr) {
+    try { reminderLogs = JSON.parse(remLogsStr); } catch (e) { console.error(e); }
+  } else {
+    localStorage.setItem(KEYS.REMINDER_LOGS, JSON.stringify(DEFAULT_REMINDER_LOGS));
+  }
+
+  // 8. Price comparison
+  let priceComparison = DEFAULT_PRICE_COMPARISON_CONFIG;
+  const prCompStr = localStorage.getItem(KEYS.PRICE_COMPARISON);
+  if (prCompStr) {
+    try { priceComparison = JSON.parse(prCompStr); } catch (e) { console.error(e); }
+  } else {
+    localStorage.setItem(KEYS.PRICE_COMPARISON, JSON.stringify(DEFAULT_PRICE_COMPARISON_CONFIG));
+  }
+
+  // 9. Announcement tickers
+  let announcementTickers = DEFAULT_ANNOUNCEMENT_TICKERS;
+  const tickersStr = localStorage.getItem(KEYS.ANNOUNCEMENT_TICKERS);
+  if (tickersStr) {
+    try { announcementTickers = JSON.parse(tickersStr); } catch (e) { console.error(e); }
+  } else {
+    localStorage.setItem(KEYS.ANNOUNCEMENT_TICKERS, JSON.stringify(DEFAULT_ANNOUNCEMENT_TICKERS));
+  }
+
+  // 10. Social feed config
+  let socialFeed = DEFAULT_SOCIAL_FEED_CONFIG;
+  const feedStr = localStorage.getItem(KEYS.SOCIAL_FEED);
+  if (feedStr) {
+    try { socialFeed = JSON.parse(feedStr); } catch (e) { console.error(e); }
+  } else {
+    localStorage.setItem(KEYS.SOCIAL_FEED, JSON.stringify(DEFAULT_SOCIAL_FEED_CONFIG));
+  }
+
+  // 11. Attendance records
+  let attendance = DEFAULT_ATTENDANCE_RECORDS;
+  const attStr = localStorage.getItem(KEYS.ATTENDANCE);
+  if (attStr) {
+    try { attendance = JSON.parse(attStr); } catch (e) { console.error(e); }
+  } else {
+    localStorage.setItem(KEYS.ATTENDANCE, JSON.stringify(DEFAULT_ATTENDANCE_RECORDS));
+  }
+
+  // 12. Gift vouchers
+  let giftVouchers = DEFAULT_GIFT_VOUCHERS;
+  const vouchStr = localStorage.getItem(KEYS.GIFT_VOUCHERS);
+  if (vouchStr) {
+    try { giftVouchers = JSON.parse(vouchStr); } catch (e) { console.error(e); }
+  } else {
+    localStorage.setItem(KEYS.GIFT_VOUCHERS, JSON.stringify(DEFAULT_GIFT_VOUCHERS));
+  }
+
+  // 13. Spa packages
+  let spaPackages = DEFAULT_SPA_PACKAGES;
+  const pkgStr = localStorage.getItem(KEYS.SPA_PACKAGES);
+  if (pkgStr) {
+    try { spaPackages = JSON.parse(pkgStr); } catch (e) { console.error(e); }
+  } else {
+    localStorage.setItem(KEYS.SPA_PACKAGES, JSON.stringify(DEFAULT_SPA_PACKAGES));
+  }
+
+  return { 
+    staff, services, offers, announcements, settings, bookings, location,
+    therapistOfTheMonth, chatMessages, loyaltyConfig, loyaltyPoints, reviews,
+    reminderConfig, reminderLogs, priceComparison, announcementTickers,
+    socialFeed, attendance, giftVouchers, spaPackages
+  };
 }
 
 export function saveLocation(location: LocationInfo) {
@@ -169,4 +344,56 @@ export function saveSettings(settings: Settings) {
 
 export function saveBookings(bookings: Booking[]) {
   localStorage.setItem(KEYS.BOOKINGS, JSON.stringify(bookings));
+}
+
+export function saveTherapistOfTheMonth(data: TherapistOfTheMonth) {
+  localStorage.setItem(KEYS.THERAPIST_OF_THE_MONTH, JSON.stringify(data));
+}
+
+export function saveChatMessages(data: ChatMessage[]) {
+  localStorage.setItem(KEYS.CHAT_MESSAGES, JSON.stringify(data));
+}
+
+export function saveLoyaltyConfig(data: LoyaltyProgramConfig) {
+  localStorage.setItem(KEYS.LOYALTY_CONFIG, JSON.stringify(data));
+}
+
+export function saveLoyaltyPoints(data: CustomerPoints[]) {
+  localStorage.setItem(KEYS.LOYALTY_POINTS, JSON.stringify(data));
+}
+
+export function saveReviews(data: Review[]) {
+  localStorage.setItem(KEYS.REVIEWS, JSON.stringify(data));
+}
+
+export function saveReminderConfig(data: ReminderConfig) {
+  localStorage.setItem(KEYS.REMINDER_CONFIG, JSON.stringify(data));
+}
+
+export function saveReminderLogs(data: ReminderLog[]) {
+  localStorage.setItem(KEYS.REMINDER_LOGS, JSON.stringify(data));
+}
+
+export function savePriceComparison(data: PriceComparisonConfig) {
+  localStorage.setItem(KEYS.PRICE_COMPARISON, JSON.stringify(data));
+}
+
+export function saveAnnouncementTickers(data: AnnouncementTicker[]) {
+  localStorage.setItem(KEYS.ANNOUNCEMENT_TICKERS, JSON.stringify(data));
+}
+
+export function saveSocialFeed(data: SocialFeedConfig) {
+  localStorage.setItem(KEYS.SOCIAL_FEED, JSON.stringify(data));
+}
+
+export function saveAttendance(data: AttendanceRecord[]) {
+  localStorage.setItem(KEYS.ATTENDANCE, JSON.stringify(data));
+}
+
+export function saveGiftVouchers(data: GiftVoucher[]) {
+  localStorage.setItem(KEYS.GIFT_VOUCHERS, JSON.stringify(data));
+}
+
+export function saveSpaPackages(data: SpaPackage[]) {
+  localStorage.setItem(KEYS.SPA_PACKAGES, JSON.stringify(data));
 }
